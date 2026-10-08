@@ -27,15 +27,7 @@ const ySocketIO = new YSocketIO(io);
 
 ySocketIO.initialize();
 
-// ==========================================
-// ROOMS
-// ==========================================
-
 const rooms = new Map();
-
-// ==========================================
-// HEALTH CHECK
-// ==========================================
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -43,10 +35,6 @@ app.get("/health", (req, res) => {
     message: "Server is running",
   });
 });
-
-// ==========================================
-// CREATE ROOM
-// ==========================================
 
 app.post("/api/rooms", (req, res) => {
   const { name } = req.body;
@@ -79,10 +67,6 @@ app.post("/api/rooms", (req, res) => {
     roomId,
   });
 });
-
-// ==========================================
-// JOIN ROOM
-// ==========================================
 
 app.post("/api/rooms/join", (req, res) => {
   const { roomId, name } = req.body;
@@ -128,10 +112,6 @@ app.post("/api/rooms/join", (req, res) => {
     roomId: normalizedRoomId,
   });
 });
-
-// ==========================================
-// SERVER
-// ==========================================
 
 httpServer.listen(3000, () => {
   console.log("Server running on port 3000!");
