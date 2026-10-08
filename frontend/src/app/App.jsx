@@ -1,72 +1,31 @@
 import "./App.css";
-
 import Editor from "@monaco-editor/react";
-
 import { MonacoBinding } from "y-monaco";
-
 import * as Y from "yjs";
-
 import { SocketIOProvider } from "y-socket.io";
-
 import { useRef, useMemo, useState, useEffect } from "react";
 
 function App() {
-  // ==========================================
-  // REFS
-  // ==========================================
-
+  
   const editorRef = useRef(null);
-
   const bindingRef = useRef(null);
-
   const providerRef = useRef(null);
-
-  // Typing timer
   const typingTimerRef = useRef(null);
-
-  // ==========================================
-  // ROOM STATE
-  // ==========================================
-
+  
   const [roomId, setRoomId] = useState(null);
-
-  // ==========================================
-  // USER STATE
-  // ==========================================
-
   const [username, setUsername] = useState("");
-
   const [users, setUsers] = useState([]);
-
-  // ==========================================
-  // LANGUAGE STATE
-  // ==========================================
-
   const [language, setLanguage] = useState("javascript");
-
-  // ==========================================
-  // UI STATE
-  // ==========================================
-
   const [error, setError] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const [copied, setCopied] = useState(false);
 
-  // ==========================================
-  // YJS
-  // ==========================================
-
+  
   const ydoc = useMemo(() => new Y.Doc(), []);
 
   const yText = useMemo(() => ydoc.getText("monaco"), [ydoc]);
 
   const yMeta = useMemo(() => ydoc.getMap("metadata"), [ydoc]);
-
-  // ==========================================
-  // MONACO MOUNT
-  // ==========================================
 
   const handleMount = (editor) => {
     editorRef.current = editor;
@@ -79,10 +38,7 @@ function App() {
       new Set([editor]),
     );
 
-    // ========================================
-    // WHO IS TYPING
-    // ========================================
-
+   
     editor.onKeyDown(() => {
       const provider = providerRef.current;
 
@@ -104,9 +60,6 @@ function App() {
     });
   };
 
-  // ==========================================
-  // CREATE PRIVATE ROOM
-  // ==========================================
 
   const createRoom = async (e) => {
     e.preventDefault();
@@ -158,9 +111,6 @@ function App() {
     }
   };
 
-  // ==========================================
-  // JOIN EXISTING ROOM
-  // ==========================================
 
   const joinRoom = async (e) => {
     e.preventDefault();
@@ -174,9 +124,6 @@ function App() {
 
       return;
     }
-
-    // Exactly 6 digits
-
     if (!/^\d{6}$/.test(enteredRoomId)) {
       setError("Room ID must be exactly 6 digits.");
 
@@ -224,9 +171,6 @@ function App() {
     }
   };
 
-  // ==========================================
-  // COPY ROOM ID
-  // ==========================================
 
   const copyRoomId = async () => {
     try {
@@ -242,9 +186,6 @@ function App() {
     }
   };
 
-  // ==========================================
-  // LEAVE ROOM
-  // ==========================================
 
   const leaveRoom = () => {
     if (typingTimerRef.current) {
@@ -284,10 +225,6 @@ function App() {
     window.history.pushState({}, "", window.location.pathname);
   };
 
-  // ==========================================
-  // YJS PROVIDER
-  // ==========================================
-
   useEffect(() => {
     if (!roomId || !username) {
       return;
@@ -307,10 +244,6 @@ function App() {
 
     providerRef.current = provider;
 
-    // ========================================
-    // LANGUAGE SYNCHRONIZATION
-    // ========================================
-
     if (!yMeta.get("language")) {
       yMeta.set("language", "javascript");
     }
@@ -327,9 +260,6 @@ function App() {
 
     yMeta.observe(updateLanguage);
 
-    // ========================================
-    // USER AWARENESS
-    // ========================================
 
     provider.awareness.setLocalStateField("user", {
       id: crypto.randomUUID(),
@@ -361,9 +291,6 @@ function App() {
 
     provider.awareness.on("change", updateUsers);
 
-    // ========================================
-    // BEFORE UNLOAD
-    // ========================================
 
     const handleBeforeUnload = () => {
       provider.awareness.setLocalStateField("user", null);
@@ -373,10 +300,7 @@ function App() {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
-    // ========================================
-    // CLEANUP
-    // ========================================
-
+  
     return () => {
       yMeta.unobserve(updateLanguage);
 
@@ -394,26 +318,19 @@ function App() {
     };
   }, [roomId, username, ydoc, yMeta]);
 
-  // ==========================================
-  // DESTROY MONACO BINDING
-  // ==========================================
-
+  
   useEffect(() => {
     return () => {
       bindingRef.current?.destroy();
     };
   }, []);
 
-  // ==========================================
-  // LANDING PAGE
-  // ==========================================
 
   if (!roomId) {
     return (
       <main className="min-h-screen w-full bg-gray-950 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-5xl">
-          {/* TITLE */}
-
+         
           <h1 className="text-3xl sm:text-4xl font-bold text-white text-center mb-3">
             Collaborative Code Editor
           </h1>
@@ -422,22 +339,13 @@ function App() {
             Code together in real time.
           </p>
 
-          {/* ERROR */}
-
           {error && (
             <div className="w-full max-w-2xl mx-auto mb-6 p-3 rounded-lg bg-red-900/50 border border-red-500 text-red-200 text-center text-sm sm:text-base">
               {error}
             </div>
           )}
-
-          {/* ROOM OPTIONS */}
-
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {/* ================================= */}
-
-            {/* CREATE ROOM */}
-
-            {/* ================================= */}
 
             <div className="bg-gray-900 rounded-xl p-5 sm:p-8">
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
@@ -465,12 +373,6 @@ function App() {
                 </button>
               </form>
             </div>
-
-            {/* ================================= */}
-
-            {/* JOIN ROOM */}
-
-            {/* ================================= */}
 
             <div className="bg-gray-900 rounded-xl p-5 sm:p-8">
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
@@ -517,34 +419,21 @@ function App() {
     );
   }
 
-  // ==========================================
-  // EDITOR
-  // ==========================================
-
-  // Users who are currently typing
   const typingUsers = users.filter(
     (user) => !user.isCurrentUser && user.typing,
   );
 
   return (
     <main className="min-h-screen w-full bg-gray-950 p-2 sm:p-3 md:p-4 flex flex-col md:flex-row gap-2">
-      {/* ==================================== */}
-
-      {/* SIDEBAR */}
-
-      {/* ==================================== */}
 
       <aside className="w-full md:w-1/4 h-auto md:h-[calc(100vh-2rem)] bg-slate-300 rounded-lg overflow-hidden">
-        {/* SIDEBAR HEADER */}
-
+   
         <div className="p-3 sm:p-4 border-b border-gray-400">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-950">Users</h2>
         </div>
 
-        {/* SIDEBAR CONTENT */}
 
         <div className="p-3 sm:p-4">
-          {/* ROOM ID */}
 
           <div className="mb-3 sm:mb-4">
             <p className="text-xs sm:text-sm text-gray-600 mb-1">Room ID</p>
@@ -563,8 +452,6 @@ function App() {
             </div>
           </div>
 
-          {/* CURRENT USER */}
-
           <div className="mb-3 sm:mb-4">
             <p className="text-xs sm:text-sm text-gray-600">You</p>
 
@@ -572,8 +459,6 @@ function App() {
               {username}
             </p>
           </div>
-
-          {/* ONLINE USERS */}
 
           <div>
             <p className="text-xs sm:text-sm text-gray-600 mb-2">
@@ -594,11 +479,6 @@ function App() {
             </div>
           </div>
 
-          {/* ==================================== */}
-
-          {/* WHO IS TYPING */}
-
-          {/* ==================================== */}
 
           {typingUsers.length > 0 && (
             <div className="mt-4 text-sm text-gray-700 italic">
@@ -610,8 +490,7 @@ function App() {
             </div>
           )}
 
-          {/* LEAVE ROOM */}
-
+  
           <div className="mt-4 md:mt-6">
             <button
               onClick={leaveRoom}
@@ -623,15 +502,8 @@ function App() {
         </div>
       </aside>
 
-      {/* ==================================== */}
-
-      {/* EDITOR */}
-
-      {/* ==================================== */}
-
       <section className="w-full md:w-3/4 h-[60vh] sm:h-[70vh] md:h-[calc(100vh-2rem)] rounded-lg overflow-hidden flex flex-col">
-        {/* TOP BAR */}
-
+ 
         <div className="bg-gray-800 p-2 sm:p-3 flex justify-end shrink-0">
           <select
             value={language}
@@ -653,8 +525,6 @@ function App() {
             <option value="cpp">C++</option>
           </select>
         </div>
-
-        {/* MONACO */}
 
         <div className="flex-1 min-h-0">
           <Editor
